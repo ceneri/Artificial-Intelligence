@@ -68,7 +68,11 @@ def tinyMazeSearch(problem):
   return  [s,s,w,s,w,w,s,w]
 
 def dfsAlg(problem, state, stack, visited):
-
+  """
+  Returns a sequence of moves that solves tinyMaze.  For any other
+  maze, the sequence of moves will be incorrect, so only use this for tinyMaze
+  """
+  
   if problem.isGoal(state):
     return True
 
@@ -121,26 +125,6 @@ def depthFirstSearch(problem):
   else:
     print "Solution not found"
 
-"""
-
-  for successor in problem.successorStates(startState):
-
-    if successor[0] not in visited:
-      stack.push(successor)
-      visited.add(successor[0]) 
-      if dfsAlg(problem, successor[0], stack, visited):
-        print "Solution found"
-        while (not stack.isEmpty()):
-          #print "Step", stack.pop()
-          solution.append(stack.pop()[1])
-        solution.reverse()
-        print "Solution:", solution
-        return solution
-      else:
-        stack.pop()
-
-  print "Solution not found"
-  """
 
 def breadthFirstSearch(problem):
   "Search the shallowest nodes in the search tree first. [p 81]"
@@ -195,13 +179,69 @@ def breadthFirstSearch(problem):
   
   #No solution found
   return None;
-        
-  
 
+def getPathCost(path):
+
+  cost = 0
+  
+  for i in range(1,len(path)):
+    cost += path[i][2]
+
+  return cost
       
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
-  util.raiseNotDefined()
+  
+  #Initialize ADSs
+  path = []
+  solution = []
+  visited = Set()
+  pQueue = util.PriorityQueue()
+
+  #Get starting state
+  startState = problem.startingState()
+
+  #Dummy start state to be pushed into a path
+  dummyStartNode = [(startState), 0, 0]
+
+  #initial path to be pushed to queue
+  path.append(dummyStartNode)
+  pQueue.push(path, 0)
+  
+  while (not pQueue.isEmpty()):
+
+    #Current solution path
+    path = pQueue.pop()
+    nextNode = path[-1]
+    nodeState = nextNode[0]
+
+    #Check for solution when new node is discovered
+    if problem.isGoal(nodeState):
+        
+      #obtain solution list from path  
+      for i in range(1,len(path)):
+        solution.append(path[i][1])
+            
+      return solution
+
+    #Add to explored only after it has been chosen for expansion
+    visited.add(nodeState)
+
+    for successor in problem.successorStates(nodeState):
+      
+        #If node has not been visited before
+        if successor[0] not in visited:
+          
+          #add end of current path, add to visited and push path to queue
+          newPath = list(path)
+          newPath.append(successor)
+          cost = getPathCost(newPath)
+          pQueue.push(newPath, cost)
+
+        #elif successor :
+        
+  #No solution found
+  return None;
 
 def nullHeuristic(state, problem=None):
   """
