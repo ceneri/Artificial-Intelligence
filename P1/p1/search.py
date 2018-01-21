@@ -12,6 +12,7 @@ by Pacman agents (in searchAgents.py).
 """
 
 import util
+from sets import Set
 
 class SearchProblem:
   """
@@ -66,6 +67,22 @@ def tinyMazeSearch(problem):
   w = Directions.WEST
   return  [s,s,w,s,w,w,s,w]
 
+def dfsAlg(problem, state, stack, visited):
+
+  if problem.isGoal(state):
+    return True
+
+  for successor in reversed(problem.successorStates(state)):
+    
+    if successor[0] not in visited:
+      stack.push(successor)
+      visited.add(successor[0]) 
+      if dfsAlg(problem, successor[0], stack, visited): return True
+      else: stack.pop()
+
+  return False;
+  
+
 def depthFirstSearch(problem):
   """
   Search the deepest nodes in the search tree first [p 85].
@@ -81,13 +98,106 @@ def depthFirstSearch(problem):
   print "Start's successors:", problem.successorStates(problem.startingState())
   """
   print "Start:", problem.startingState()
-  
-  util.raiseNotDefined()
+  print "Is the start a goal?", problem.isGoal(problem.startingState())
+  print "Start's successors:", problem.successorStates(problem.startingState())
 
+
+  #Initialize ADSs
+  print "Initialize set and stack"
+  solution = []
+  visited = Set()
+  stack = util.Stack()
+  
+  startState = problem.startingState()
+  visited.add(startState)
+
+  if dfsAlg(problem, startState, stack, visited):
+    while (not stack.isEmpty()):
+          #print "Step", stack.pop()
+          solution.append(stack.pop()[1])
+    solution.reverse()
+    print "Solution length:", len(solution)
+    return solution
+  else:
+    print "Solution not found"
+
+"""
+
+  for successor in problem.successorStates(startState):
+
+    if successor[0] not in visited:
+      stack.push(successor)
+      visited.add(successor[0]) 
+      if dfsAlg(problem, successor[0], stack, visited):
+        print "Solution found"
+        while (not stack.isEmpty()):
+          #print "Step", stack.pop()
+          solution.append(stack.pop()[1])
+        solution.reverse()
+        print "Solution:", solution
+        return solution
+      else:
+        stack.pop()
+
+  print "Solution not found"
+  """
 
 def breadthFirstSearch(problem):
   "Search the shallowest nodes in the search tree first. [p 81]"
-  util.raiseNotDefined()
+  
+  #Initialize ADSs
+  path = []
+  solution = []
+  visited = Set()
+  queue = util.Queue()
+
+  #Get starting state
+  startState = problem.startingState()
+  visited.add(startState)
+
+  #Dummy start state to be pushed into a path
+  dummyStartNode = [(startState), 0, 0]
+
+  #initial path to be pushed to queue
+  path.append(dummyStartNode)
+  queue.push(path)
+  
+  while (not queue.isEmpty()):
+
+    #Current solution path
+    path = queue.pop()
+    nextNode = path[-1]
+    nodeState = nextNode[0]
+
+    for successor in problem.successorStates(nodeState):
+
+      #Check for solution when new node is discovered
+      if problem.isGoal(successor[0]):
+        
+        #if solution is found add lates node to the solution path
+        path.append(successor)
+        #obtain solution list from path  
+        for i in range(1,len(path)):
+            solution.append(path[i][1])
+            
+        return solution
+      
+      else:
+        
+        #If node has not been visited before
+        if successor[0] not in visited:
+          
+          #add end of current path, add to visited and push path to queue
+          visited.add(successor[0])
+          newPath = list(path)
+          newPath.append(successor)
+          queue.push(newPath)
+  
+  #No solution found
+  return None;
+        
+  
+
       
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
@@ -111,3 +221,8 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
+
+
+
+  
