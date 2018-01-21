@@ -260,7 +260,9 @@ class CornersProblem(search.SearchProblem):
   """
   This search problem finds paths through all four corners of a layout.
 
-  You must select a suitable state space and successor function
+  A search state in this problem is a tuple ( pacmanPosition, cornerVisited ) where
+    pacmanPosition: a tuple (x,y) of integers specifying Pacman's position
+    cornerVisited:  a boolean tuple representing Grid specifying remaining corners to visit 
   """
   
   def __init__(self, startingGameState):
@@ -391,8 +393,7 @@ def cornersHeuristic(state, problem):
   heuristic = 0
   
   #Current State Info
-  statePos = state[0]
-  stateVisited = state[1]
+  statePos, stateVisited = state
 
   #Go trough every corner
   for i in range(len(corners)):
@@ -492,7 +493,17 @@ def foodHeuristic(state, problem):
   """
   position, foodGrid = state
   "*** Your Code Here ***"
-  return 0
+
+  #Initial heurictic
+  heuristic = 0
+
+  #Go trough every corner
+  for foodCoordinate in foodGrid.asList():
+    
+    #For every uneaten ball add to heuristic (The further you are from corners the worst heuristic value)
+    heuristic += manhattanDistance(position, foodCoordinate)
+  
+  return heuristic
 
 def numFoodHeuristic(state, problem):
   return state[1].count()
