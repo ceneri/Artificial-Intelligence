@@ -252,7 +252,57 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
   "Search the node that has the lowest combined cost and heuristic first."
-  util.raiseNotDefined()
+  #Initialize ADSs
+  path = []
+  solution = []
+  visited = Set()
+  pQueue = util.PriorityQueue()
+
+  #Get starting state
+  startState = problem.startingState()
+
+  #Dummy start state to be pushed into a path
+  dummyStartNode = [(startState), 0, 0]
+
+  #initial path to be pushed to queue
+  path.append(dummyStartNode)
+  pQueue.push(path, 0)
+  
+  while (not pQueue.isEmpty()):
+
+    #Current solution path
+    path = pQueue.pop()
+    nextNode = path[-1]
+    nodeState = nextNode[0]
+
+    #Check for solution when new node is discovered
+    if problem.isGoal(nodeState):
+        
+      #obtain solution list from path  
+      for i in range(1,len(path)):
+        solution.append(path[i][1])
+            
+      return solution
+
+    #Add to explored only after it has been chosen for expansion
+    visited.add(nodeState)
+
+    for successor in problem.successorStates(nodeState):
+      
+        #If node has not been visited before
+        if successor[0] not in visited:
+          
+          #add end of current path, add to visited and push path to queue
+          newPath = list(path)
+          newPath.append(successor)
+          cost = getPathCost(newPath)
+          priority = cost + heuristic(successor[0], problem)
+          pQueue.push(newPath, priority)
+
+        #elif successor :
+        
+  #No solution found
+  return None;
     
 
   
