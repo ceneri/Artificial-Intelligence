@@ -372,6 +372,49 @@ def manhattanDistance(position1, position2):
   xy2 = position2
   return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
 
+def recursiveClosestCorner(problem, pos, cornerStates):
+  """
+  A recursive heuristic helper for the CornersProblem.
+  
+    pos:   Current position in the Grid being evaluated
+    
+    problem: The CornersProblem instance for this layout.
+
+    cornerStates: List of corners yet to be visited
+    
+  This function calculates the heuristic distance to closets corner,
+  and then callls itself recursively to get heuristic distance to remaining
+  corners from the closest corner
+  """
+  
+  corners = problem.corners # These are the corner coordinates
+  #walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+
+  corners2BVisited = []
+  heuristicSum = 0
+  minimumDis = 999999
+
+  #if there is at least one corner to visit
+  if len(cornerStates) > 0:
+
+    #Get the closest corner and its distance
+    for cornerPos in cornerStates:
+      if manhattanDistance(pos,cornerPos) < minimumDis:
+        minimumDis = manhattanDistance(pos,cornerPos)
+        minimumCorner = cornerPos
+
+    #add closet possible distance to close corner
+    heuristicSum += minimumDis
+  
+    #create list of remaining corners
+    corners2BVisited = list(cornerStates)
+    corners2BVisited.remove(cornerPos)
+    heuristicSum += recursiveClosestCorner(problem, cornerPos, corners2BVisited)
+
+  return heuristicSum
+  
+  
+
 def cornersHeuristic(state, problem):
   """
   A heuristic for the CornersProblem that you defined.
@@ -386,22 +429,29 @@ def cornersHeuristic(state, problem):
   it should be admissible.  (You need not worry about consistency for
   this heuristic to receive full credit.)
   """
+  
   corners = problem.corners # These are the corner coordinates
-  walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+  #walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-  #Initial heurictic
-  heuristic = 0
-  
   #Current State Info
-  statePos, stateVisited = state
+  statePos, stateVisitedCorners = state
 
-  #Go trough every corner
-  for i in range(len(corners)):
-    
-    #For every undiscovered corner add to heuristic (The further you are from corners the worst heuristic value)
-    if not stateVisited[i]:
-      heuristic += manhattanDistance(statePos, corners[i])
-  
+  #List of corners that still needs to be visited
+  corners2BVisited = []
+
+  #h value
+  heuristic = 0
+
+  #Fill list of corners yet to be visited
+  for corner in range(4):
+    if stateVisitedCorners[corner] == False:
+      
+      corners2BVisited.append(corners[corner])
+
+  #Get the heuristic path involving the closest corner
+  heuristic = recursiveClosestCorner(problem, statePos, corners2BVisited)
+
+  #return
   return heuristic
 
 class AStarCornersAgent(SearchAgent):
