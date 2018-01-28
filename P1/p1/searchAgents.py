@@ -515,7 +515,7 @@ class AStarFoodSearchAgent(SearchAgent):
   def __init__(self):
     self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
     self.searchType = FoodSearchProblem
-
+    
 def foodHeuristic(state, problem):
   """
   Your heuristic for the FoodSearchProblem goes here.
@@ -541,20 +541,34 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount'] = problem.walls.count()
   Subsequent calls to this heuristic can access problem.heuristicInfo['wallCount']
   """
+  #Current State Info
   position, foodGrid = state
+  foodList = foodGrid.asList()
   "*** Your Code Here ***"
+  startState = problem.startingGameState
 
-  #Initial heurictic
-  heuristic = 0
+  maximum = 0
+  minimum = 99999
 
-  #Go trough every corner
-  for foodCoordinate in foodGrid.asList():
-    
-    #For every uneaten ball add to heuristic (The further you are from corners the worst heuristic value)
-    heuristic += manhattanDistance(position, foodCoordinate)
-  
+  if len(foodList) == 0:
+    return 0
+
+  for x in range(foodGrid.width):
+
+    for y in range (foodGrid.height):
+
+      if foodGrid[x][y]:
+        #maximum = max( maximum, manhattanDistance(position, (x,y) ) )
+        #minimum = min( minimum, manhattanDistance(position, (x,y) ) )
+        maximum = max( maximum, mazeDistance(position, (x,y), startState ) )
+        #minimum = min( minimum, mazeDistance(position, (x,y), startState ) )
+
+  heuristic = maximum 
+  #heuristic = minimum
+  #heuristic = maximum + minimum
+
   return heuristic
-
+  
 def numFoodHeuristic(state, problem):
   return state[1].count()
 
@@ -585,8 +599,7 @@ class ClosestDotSearchAgent(SearchAgent):
     walls = gameState.getWalls()
     problem = AnyFoodSearchProblem(gameState)
 
-    "*** Your Code Here ***"
-    util.raiseNotDefined()
+    return search.breadthFirstSearch(problem)
     
   
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -621,9 +634,10 @@ class AnyFoodSearchProblem(PositionSearchProblem):
     that will complete the problem definition.
     """
     x,y = state
-    
-    "*** Your Code Here ***"
-    util.raiseNotDefined()
+    food = self.food
+
+    #If that state has a valid food in it, it is a goals state
+    return food[x][y]
 
 ##################
 # Mini-contest 1 #

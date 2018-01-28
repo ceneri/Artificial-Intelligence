@@ -69,21 +69,30 @@ def tinyMazeSearch(problem):
 
 def dfsAlg(problem, state, stack, visited):
   """
-  Returns a sequence of moves that solves tinyMaze.  For any other
-  maze, the sequence of moves will be incorrect, so only use this for tinyMaze
+  Recursive method invoked by DFS, checks for goal otherwise pushes succerssors and
+  calls itself again recursively
   """
   
+  #Check for solution  
   if problem.isGoal(state):
     return True
 
+  #Enter all successors reversed
   for successor in reversed(problem.successorStates(state)):
     
+    #If the state has not been visited in the past, add to stack and set
     if successor[0] not in visited:
+      
       stack.push(successor)
-      visited.add(successor[0]) 
-      if dfsAlg(problem, successor[0], stack, visited): return True
-      else: stack.pop()
+      visited.add(successor[0])
 
+      #Recursive call
+      if dfsAlg(problem, successor[0], stack, visited):
+        return True
+      else:
+        stack.pop()
+
+  #No path found
   return False;
   
 
@@ -101,29 +110,35 @@ def depthFirstSearch(problem):
   print "Is the start a goal?", problem.isGoal(problem.startingState())
   print "Start's successors:", problem.successorStates(problem.startingState())
   """
-  print "Start:", problem.startingState()
-  print "Is the start a goal?", problem.isGoal(problem.startingState())
-  print "Start's successors:", problem.successorStates(problem.startingState())
-
+  #print "Start:", problem.startingState()
+  #print "Is the start a goal?", problem.isGoal(problem.startingState())
+  #print "Start's successors:", problem.successorStates(problem.startingState())
 
   #Initialize ADSs
-  print "Initialize set and stack"
   solution = []
   visited = Set()
   stack = util.Stack()
   
+  #Get an enter start state to stack
   startState = problem.startingState()
   visited.add(startState)
 
+  #If recursive DFS found a solution, extract info from stack
   if dfsAlg(problem, startState, stack, visited):
+
     while (not stack.isEmpty()):
-          #print "Step", stack.pop()
-          solution.append(stack.pop()[1])
+      nxtDirection = stack.pop()[1]
+      solution.append(nxtDirection)
+
+    #Instructions are in reverse order
     solution.reverse()
-    print "Solution length:", len(solution)
+
     return solution
+  
   else:
-    print "Solution not found"
+    
+    #Solution not found
+    return None
 
 
 def breadthFirstSearch(problem):
