@@ -165,9 +165,11 @@ def breadthFirstSearch(problem):
 
     #Current solution path
     path = queue.pop()
+    #Get the element at the back of the path (FIFO)
     nextNode = path[-1]
     nodeState = nextNode[0]
 
+    #Get all successors
     for successor in problem.successorStates(nodeState):
 
       #Check for solution when new node is discovered
@@ -175,9 +177,11 @@ def breadthFirstSearch(problem):
         
         #if solution is found add lates node to the solution path
         path.append(successor)
-        #obtain solution list from path  
+        
+        #Obtain solution list from path  
         for i in range(1,len(path)):
-            solution.append(path[i][1])
+            nxtDirection = path[i][1]
+            solution.append(nxtDirection)
             
         return solution
       
@@ -196,13 +200,17 @@ def breadthFirstSearch(problem):
   return None;
 
 def getPathCost(path):
-
-  cost = 0
+  """
+  Returns the cost of a path (list made of nodes)
+  """
+  
+  totalCost = 0
   
   for i in range(1,len(path)):
-    cost += path[i][2]
+    cost = path[i][2]
+    totalCost += cost
 
-  return cost
+  return totalCost
       
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
@@ -227,6 +235,7 @@ def uniformCostSearch(problem):
 
     #Current solution path
     path = pQueue.pop()
+    #Get the element at the back of the path (FIFO)
     nextNode = path[-1]
     nodeState = nextNode[0]
 
@@ -235,7 +244,8 @@ def uniformCostSearch(problem):
         
       #obtain solution list from path  
       for i in range(1,len(path)):
-        solution.append(path[i][1])
+        nxtDirection = path[i][1]
+        solution.append(nxtDirection)
             
       return solution
 
@@ -247,7 +257,7 @@ def uniformCostSearch(problem):
         #If node has not been visited before
         if successor[0] not in visited:
           
-          #add end of current path, add to visited and push path to queue
+          #Add end of current path, add to visited and push path to queue
           newPath = list(path)
           newPath.append(successor)
           cost = getPathCost(newPath)
@@ -292,7 +302,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     #Check for solution when new node is discovered
     if problem.isGoal(nodeState):
-        
+          
       #obtain solution list from path  
       for i in range(1,len(path)):
         solution.append(path[i][1])
@@ -311,6 +321,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
           newPath = list(path)
           newPath.append(successor)
           cost = getPathCost(newPath)
+          #priority based on f(n) + h(n)
           priority = cost + heuristic(successor[0], problem)
           pQueue.push(newPath, priority)
 
@@ -319,8 +330,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
   #No solution found
   return None;
     
-
-  
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch

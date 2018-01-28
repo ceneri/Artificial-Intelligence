@@ -330,6 +330,7 @@ class CornersProblem(search.SearchProblem):
       
          "*** Your Code Here ***"
          if hitsWall:
+           
            #ignore
            continue
 
@@ -368,6 +369,9 @@ class CornersProblem(search.SearchProblem):
 
 
 def manhattanDistance(position1, position2):
+  """
+  Returns the manhattan distance of two points. (No info on the problem at hand required)
+  """
   xy1 = position1
   xy2 = position2
   return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
@@ -383,7 +387,7 @@ def recursiveClosestCorner(problem, pos, cornerStates):
     cornerStates: List of corners yet to be visited
     
   This function calculates the heuristic distance to closets corner,
-  and then callls itself recursively to get heuristic distance to remaining
+  and then calls itself recursively to get heuristic distance to remaining
   corners from the closest corner
   """
   
@@ -541,18 +545,24 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount'] = problem.walls.count()
   Subsequent calls to this heuristic can access problem.heuristicInfo['wallCount']
   """
+  """
+  Food Heuristic is based on finding the maze distance to the farthers food
+  """
+  
   #Current State Info
   position, foodGrid = state
   foodList = foodGrid.asList()
+  
   "*** Your Code Here ***"
   startState = problem.startingGameState
 
   maximum = 0
-  minimum = 99999
+  #minimum = 99999
 
   if len(foodList) == 0:
     return 0
 
+  #Go trough every food in the GRID
   for x in range(foodGrid.width):
 
     for y in range (foodGrid.height):
