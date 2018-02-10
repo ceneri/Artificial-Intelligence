@@ -70,7 +70,7 @@ class ReflexAgent(Agent):
     "*** YOUR CODE HERE ***"
     eval = 0
 
-    #Obtain ghos position tuples
+    #Obtain ghost position tuples
     ghostPositions = []
     for ghostState in newGhostStates:
     	ghostPositions.append(ghostState.getPosition())
@@ -471,14 +471,79 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     #util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
-  """
-    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-    evaluation function (question 5).
+    """
+        Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+        evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
-  """
-  "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+        DESCRIPTION: <write something here so we know what you did>
+
+        The evaluation is similar to the original evaluation with additional tweaks to hopefully
+        have a better end result
+
+        The first cosntraint is checking for win and loose states. If a win state is found
+        a large value is returned, while the opposite is done with a loose state
+
+        Otherwise the distance from ghosts is calculated as a basis for survival. To promote 
+        Pacman to eat while ghost are in opposite side of layout, when a ghost is far away
+        an extra bonus value of 100 is added to the evaluation. I tried different multipliers, 
+        and 10 seems to be adequate to keep survival as a high priority
+
+        The next important value to consider is distance from food. DIstances to all foods are 
+        substracted to promote being as close to food a spossible.
+
+        Finally we also give extra bonus of 100 to positions that conmtain a capsule
+        hoping to give said position an extra incentive to be chosen
+
+        I also tried to promote moving closer towards scared ghosts but implementing that
+        was quite problematic due to the object type of the ghosts and the provided 
+        scaredtimes. Plus no notisable benefit was seen when implemented 
+    """
+
+    newPosition = currentGameState.getPacmanPosition()
+    oldFood = currentGameState.getFood()
+    capsules = currentGameState.getCapsules()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+
+    eval = 0
+
+    "*** YOUR CODE HERE ***"
+
+    if currentGameState.isWin():
+        return 999999
+    elif currentGameState.isLose():
+        return -999999
+    else:
+
+        #Obtain ghost position tuples
+        ghostPositions = []
+        for ghostState in newGhostStates:
+            ghostPositions.append(ghostState.getPosition())
+
+        #The farther you are from a ghost, the better the position is
+        for ghostPos in ghostPositions:
+            if manhattanDistance(ghostPos, newPosition) > 8:
+                eval = eval + 100
+                continue
+            eval = eval + manhattanDistance(ghostPos, newPosition)
+
+        #Survival is very important
+        eval = eval * 10
+
+        #Foods as a list
+        food = oldFood.asList()
+        foodLeft = len(food)
+
+        #The farther you are from a food, the worst the position is
+        for foodPos in food:
+            eval = eval - manhattanDistance(foodPos, newPosition)
+
+
+        for capsulePos in capsules:
+            if capsulePos == newPosition:
+                eval = eval + 100
+
+        return eval
 
 # Abbreviation
 better = betterEvaluationFunction
@@ -498,4 +563,3 @@ class ContestAgent(MultiAgentSearchAgent):
     """
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
-
