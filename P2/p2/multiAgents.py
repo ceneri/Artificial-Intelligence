@@ -378,7 +378,97 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       legal moves.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    def eMaxValue(state, depth, utilityFunction):
+
+        #print depth
+        PACMAN_INDEX = 0
+        GHOST_INDEX = 1
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = -999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(PACMAN_INDEX)
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+
+            #Fourth line from books pseudocode
+            utility = max(utility, eMinValue(successorState, GHOST_INDEX, depth, utilityFunction) )
+            
+        return utility
+
+    def eMinValue(state, agent_index, depth, utilityFunction):
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        expectedUtility = 0
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(agent_index)
+
+        #Generalize alg to handle multi ghost
+
+        #Next one is pacman/MAX (Number of ghosts)
+        if agent_index == (state.getNumAgents() - 1):
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+                
+                #Fourth line from books pseudocode
+                expectedUtility = expectedUtility + eMaxValue(successorState, depth-1, utilityFunction)
+        
+        else:
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+
+                #Fourth line from books pseudocode
+                expectedUtility = expectedUtility + eMinValue(successorState, agent_index+1, depth, utilityFunction)
+
+
+        #Each action has equal chance of taking place
+        expectedUtility = expectedUtility / len (legalMoves)
+        return expectedUtility
+
+    def expectimax(state, treeDepth, utilityFunction):
+
+        #Agent index
+        PACMAN_INDEX = 0
+
+        # Collect legal moves and successor states
+        legalMoves = state.getLegalActions()
+        #legalMoves.remove(Directions.STOP)
+
+        #First line from books pseudocode
+        argmax = Directions.STOP
+        max_u = -999999
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+            utility = eMinValue(successorState, 1, treeDepth, utilityFunction)
+
+            if utility > max_u:
+               max_u = utility
+               argmax = action
+
+        return argmax
+
+    #endof expectimax
+
+    #Variable declaration
+    treeDepth = self.treeDepth
+    utilityFunction = self.evaluationFunction
+
+    return expectimax(gameState, treeDepth, utilityFunction)
+
+    #util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
   """
