@@ -68,36 +68,29 @@ class ReflexAgent(Agent):
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     "*** YOUR CODE HERE ***"
-    #print "Type", type(newPosition), newPosition				#tuple
-    #print "Type", type(oldFood), oldFood						#instance
-    #print "Type", type(newGhostStates), newGhostStates			#list of agent states
-    #print "Type", type(newScaredTimes), newScaredTimes			#list
-
     eval = 0
 
-    #print "Type", type(newGhostStates[0]), newGhostStates[0].getPosition()
+    #Obtain ghos position tuples
     ghostPositions = []
     for ghostState in newGhostStates:
     	ghostPositions.append(ghostState.getPosition())
 
-    #print ghostPositions
-
+    #The farther you are from a ghost, the better the position is
     for ghostPos in ghostPositions:
     	eval = eval + manhattanDistance(ghostPos, newPosition)
 
-	#eval = eval*10
-
+	#Foods as a list
 	food = oldFood.asList()
 	foodLeft = len(food)
 
+	#Obtain distance to closest food
 	closestFood = 9999
 	for foodPos in food:
 		closestFood = min (closestFood, manhattanDistance(foodPos, newPosition) )
 
+	#The closest a food item is, the better
 	eval = eval - (closestFood*2)
-
-    #farther you are from ghosts the better
-
+ 
     return eval
 
     #return successorGameState.getScore()
@@ -158,7 +151,113 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+
+    def maxValue(state, depth, utilityFunction):
+
+        #print depth
+        PACMAN_INDEX = 0
+        GHOST_INDEX = 1
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = -999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(PACMAN_INDEX)
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+
+            #Fourth line from books pseudocode
+            utility = max(utility, minValue(successorState, GHOST_INDEX, depth-1, utilityFunction) )
+            
+        return utility
+
+    def minValue(state, agent_index, depth, utilityFunction):
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = 999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(agent_index)
+
+        #Generalize alg to handle multi ghost
+
+        #Next one is pacman/MAX (Number of ghosts)
+        if agent_index == (state.getNumAgents() - 1):
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+                
+                #Fourth line from books pseudocode
+                utility = min(utility, maxValue(successorState, depth-1, utilityFunction) )
+        
+        else:
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+
+                #Fourth line from books pseudocode
+                utility = min(utility, minValue(successorState, agent_index+1, depth, utilityFunction) )
+
+
+        return utility
+
+    def minimaxDecision(state, treeDepth, utilityFunction):
+
+        #Agent index
+        PACMAN_INDEX = 0
+
+        # Collect legal moves and successor states
+        legalMoves = state.getLegalActions()
+        #legalMoves.remove(Directions.STOP)
+
+        #First line from books pseudocode
+        argmax = Directions.STOP
+        max_u = -999999
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+            utility = minValue(successorState, 1, treeDepth, utilityFunction)
+
+            if utility > max_u:
+               max_u = utility
+               argmax = action
+
+        print "Utility of MINMAX", argmax
+        return argmax
+
+    
+
+    
+
+    #endof minvalue
+
+
+    #Variable declaration
+    treeDepth = self.treeDepth
+    utilityFunction = self.evaluationFunction
+    numberOfAgents = gameState.getNumAgents()
+    numberOfGhosts = numberOfAgents -1 
+
+    print "agents", numberOfAgents
+    print "gho", numberOfGhosts
+
+
+    return minimaxDecision(gameState, treeDepth, utilityFunction)
+    #util.raiseNotDefined()
+
+
+    # Collect legal moves and successor states
+
+
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
