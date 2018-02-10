@@ -251,7 +251,119 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       Returns the minimax action using self.treeDepth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    def ABmaxValue(state, alpha, beta, depth, utilityFunction):
+
+        #print depth
+        PACMAN_INDEX = 0
+        GHOST_INDEX = state.getNumAgents() - 1
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = -999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(PACMAN_INDEX)
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+
+            #Fourth line from books pseudocode
+            utility = max(utility, ABminValue(successorState, alpha, beta, GHOST_INDEX, depth, utilityFunction) )         
+
+            #check for prunning
+            if utility >= beta:
+                break
+            alpha = max(alpha, utility)
+
+        return utility
+
+    def ABminValue(state, alpha, beta, agent_index, depth, utilityFunction):
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = 999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(agent_index)
+
+        #Generalize alg to handle multi ghost
+
+        #Next one is pacman/MAX (Number of ghosts)
+        if agent_index == (state.getNumAgents() - 1):
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+                
+                #Fourth line from books pseudocode
+                utility = min(utility, ABmaxValue(successorState, alpha, beta, depth-1, utilityFunction) )
+                
+                #Stop and prune
+                if utility <= alpha:
+                    break
+                beta = min(beta, utility)
+
+        else:
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+
+                #Fourth line from books pseudocode
+                utility = min(utility, ABminValue(successorState, alpha, beta, agent_index+1, depth, utilityFunction) )
+                #Stop and prune
+                if utility <= alpha:
+                    break
+                beta = min(beta, utility)
+
+
+        return utility
+
+    def AlphaBetaSearch(state, treeDepth, utilityFunction):
+
+        alpha = -float("inf")
+        beta = float("inf")
+
+        #Agent index
+        PACMAN_INDEX = 0
+
+        # Collect legal moves and successor states
+        legalMoves = state.getLegalActions()
+        #legalMoves.remove(Directions.STOP)
+
+        #First line from books pseudocode
+        argmax = Directions.STOP
+        max_u = -999999
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+            utility = ABminValue(successorState, alpha, beta, 1, treeDepth, utilityFunction)
+
+            if utility > max_u:
+               max_u = utility
+               argmax = action
+
+            #Stop and prune
+            if utility >= beta:
+                argmax = action
+                break
+
+            alpha = max(alpha, utility)
+
+        return argmax
+
+    #endof AlphaBetaSearch
+
+    #Variable declaration
+    treeDepth = self.treeDepth
+    utilityFunction = self.evaluationFunction
+
+    return AlphaBetaSearch(gameState, treeDepth, utilityFunction)
+
+    #util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
