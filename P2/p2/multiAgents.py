@@ -152,7 +152,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
     "*** YOUR CODE HERE ***"
 
-
     def maxValue(state, depth, utilityFunction):
 
         #print depth
@@ -230,34 +229,17 @@ class MinimaxAgent(MultiAgentSearchAgent):
                max_u = utility
                argmax = action
 
-        print "Utility of MINMAX", argmax
         return argmax
 
-    
-
-    
-
-    #endof minvalue
-
+    #endof minimaxDecision
 
     #Variable declaration
     treeDepth = self.treeDepth
     utilityFunction = self.evaluationFunction
-    numberOfAgents = gameState.getNumAgents()
-    numberOfGhosts = numberOfAgents -1 
-
-    print "agents", numberOfAgents
-    print "gho", numberOfGhosts
-
 
     return minimaxDecision(gameState, treeDepth, utilityFunction)
+
     #util.raiseNotDefined()
-
-
-    # Collect legal moves and successor states
-
-
-
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
