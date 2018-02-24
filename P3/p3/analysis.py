@@ -28,10 +28,11 @@ def question2():
 
 def question3a():
   answerDiscount = 0.9
-  answerNoise = 0.2
-  answerLivingReward = 0.0
+  answerNoise = 0.1
+  answerLivingReward = -4.0
   """Description:
-  [Enter a description of what you did here.]
+  Noise reduced so agent has confidence that he will land in desired state, cost of living is too expensive
+  it is not worth going after the +10 exit
   """
   """ YOUR CODE HERE """
 
@@ -40,13 +41,14 @@ def question3a():
   # If not possible, return 'NOT POSSIBLE'
 
 def question3b():
-  answerDiscount = 0.9
+  answerDiscount = 0.2
   answerNoise = 0.2
   answerLivingReward = 0.0
   """Description:
-  [Enter a description of what you did here.]
+  Discount is reeduced while cost of living is not changed
   """
   """ YOUR CODE HERE """
+  return 'NOT POSSIBLE'
 
   """ END CODE """
   return answerDiscount, answerNoise, answerLivingReward
@@ -54,10 +56,10 @@ def question3b():
 
 def question3c():
   answerDiscount = 0.9
-  answerNoise = 0.2
-  answerLivingReward = 0.0
+  answerNoise = 0.1
+  answerLivingReward = -1.0
   """Description:
-  [Enter a description of what you did here.]
+  Cost of living is up a little bit, promoting risking the cliff. Nosie is reduced
   """
   """ YOUR CODE HERE """
 
@@ -70,7 +72,7 @@ def question3d():
   answerNoise = 0.2
   answerLivingReward = 0.0
   """Description:
-  [Enter a description of what you did here.]
+  Cost of living is too low to risk the cliff, might as well take it slow :)
   """
   """ YOUR CODE HERE """
 

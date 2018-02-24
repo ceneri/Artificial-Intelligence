@@ -37,6 +37,7 @@ class QLearningAgent(ReinforcementAgent):
     "You can initialize Q-values here..."
     ReinforcementAgent.__init__(self, **args)
 
+    self.qValues = util.Counter()
 
 
   def getQValue(self, state, action):
@@ -49,7 +50,14 @@ class QLearningAgent(ReinforcementAgent):
     [Enter a description of what you did here.]
     """
     """ YOUR CODE HERE """
-    util.raiseNotDefined()
+    #if (state, action) in self.qValues:
+     # return self.qValues[(state, action)]
+    #else:
+     # return 0.0
+
+    return self.qValues[(state, action)]
+
+    #util.raiseNotDefined()
     """ END CODE """
 
 
@@ -65,7 +73,29 @@ class QLearningAgent(ReinforcementAgent):
     [Enter a description of what you did here.]
     """
     """ YOUR CODE HERE """
-    util.raiseNotDefined()
+    actions = self.getLegalActions(state)
+
+    #There are no legal actions 
+    if len(actions) == 0:
+      return 0.0
+
+    max_action = None
+    max_Value = -999999
+
+    for action in actions:
+      q_val = self.getQValue(state, action)
+
+      if q_val > max_Value:
+        max_Value = q_val
+        max_action = action
+
+    if max_action == None:
+      return 0.0
+    else:
+      return max_Value
+
+
+    #util.raiseNotDefined()
     """ END CODE """
 
   def getPolicy(self, state):
@@ -78,7 +108,29 @@ class QLearningAgent(ReinforcementAgent):
     [Enter a description of what you did here.]
     """
     """ YOUR CODE HERE """
-    util.raiseNotDefined()
+    actions = self.getLegalActions(state)
+
+    #There are no legal actions 
+    if len(actions) == 0:
+      return None
+
+    max_action = None
+    max_Value = -999999
+
+    for action in actions:
+      q_val = self.getQValue(state, action)
+
+      if q_val > max_Value:
+        max_Value = q_val
+        max_action = action
+
+    if max_action == None:
+      return None
+    else:
+      return max_action
+
+
+    #util.raiseNotDefined()
     """ END CODE """
 
   def getAction(self, state):
@@ -100,7 +152,19 @@ class QLearningAgent(ReinforcementAgent):
     [Enter a description of what you did here.]
     """
     """ YOUR CODE HERE """
-    util.raiseNotDefined()
+    #There are no legal actions 
+    if len(legalActions) == 0:
+      return action
+
+    #Random epsilon chance
+    if util.flipCoin(self.epsilon):
+      action = random.choice(legalActions)
+
+    #Take best possible action
+    else:
+      action = self.getPolicy(state)
+
+    #util.raiseNotDefined()
     """ END CODE """
 
     return action
@@ -118,7 +182,19 @@ class QLearningAgent(ReinforcementAgent):
     [Enter a description of what you did here.]
     """
     """ YOUR CODE HERE """
-    util.raiseNotDefined()
+    alpha = self.alpha
+    oldQValue = self.qValues[(state,action)]
+    discount = self.discountRate
+    maxQ = self.getValue(nextState)
+
+    #Q-Learning
+    sample = reward + (discount * maxQ)
+    newQValue = (1-alpha) * oldQValue + ( alpha * sample )
+
+    #Update value
+    self.qValues[(state,action)] = newQValue
+
+    #util.raiseNotDefined()
     """ END CODE """
 
 class PacmanQAgent(QLearningAgent):
