@@ -15,9 +15,11 @@
 
 def question2():
   answerDiscount = 0.9
-  answerNoise = 0.2
+  answerNoise = 0.0
   """Description:
-  [Enter a description of what you did here.]
+  The agent is "afraid" of crossing the bridge due to the high risk of "falling" and its big cost.
+  However if we reduce the noise, meaning the agent will always land on his chosen nextState, the risk
+  is completely inhibited, encouraging the agent to cross the bridge
   """
   """ YOUR CODE HERE """
 
