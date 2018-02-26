@@ -84,9 +84,6 @@ def question3e():
   answerDiscount = 0.9
   answerNoise = 0.2
   answerLivingReward = 0.0
-  """Description:
-  [Enter a description of what you did here.]
-  """
   """ YOUR CODE HERE """
 
   """ END CODE """
@@ -94,8 +91,8 @@ def question3e():
   # If not possible, return 'NOT POSSIBLE'
 
 def question6():
-  answerEpsilon = None
-  answerLearningRate = None
+  answerEpsilon = .3
+  answerLearningRate = .2
   """Description:
   [Enter a description of what you did here.]
   """
