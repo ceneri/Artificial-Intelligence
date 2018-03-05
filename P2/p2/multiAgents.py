@@ -68,7 +68,32 @@ class ReflexAgent(Agent):
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     "*** YOUR CODE HERE ***"
-    return successorGameState.getScore()
+    eval = 0
+
+    #Obtain ghost position tuples
+    ghostPositions = []
+    for ghostState in newGhostStates:
+    	ghostPositions.append(ghostState.getPosition())
+
+    #The farther you are from a ghost, the better the position is
+    for ghostPos in ghostPositions:
+    	eval = eval + manhattanDistance(ghostPos, newPosition)
+
+	#Foods as a list
+	food = oldFood.asList()
+	foodLeft = len(food)
+
+	#Obtain distance to closest food
+	closestFood = 9999
+	for foodPos in food:
+		closestFood = min (closestFood, manhattanDistance(foodPos, newPosition) )
+
+	#The closest a food item is, the better
+	eval = eval - (closestFood*2)
+ 
+    return eval
+
+    #return successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
   """
@@ -126,7 +151,95 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    def maxValue(state, depth, utilityFunction):
+
+        #print depth
+        PACMAN_INDEX = 0
+        GHOST_INDEX = 1
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = -999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(PACMAN_INDEX)
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+
+            #Fourth line from books pseudocode
+            utility = max(utility, minValue(successorState, GHOST_INDEX, depth-1, utilityFunction) )
+            
+        return utility
+
+    def minValue(state, agent_index, depth, utilityFunction):
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = 999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(agent_index)
+
+        #Generalize alg to handle multi ghost
+
+        #Next one is pacman/MAX (Number of ghosts)
+        if agent_index == (state.getNumAgents() - 1):
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+                
+                #Fourth line from books pseudocode
+                utility = min(utility, maxValue(successorState, depth-1, utilityFunction) )
+        
+        else:
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+
+                #Fourth line from books pseudocode
+                utility = min(utility, minValue(successorState, agent_index+1, depth, utilityFunction) )
+
+
+        return utility
+
+    def minimaxDecision(state, treeDepth, utilityFunction):
+
+        #Agent index
+        PACMAN_INDEX = 0
+
+        # Collect legal moves and successor states
+        legalMoves = state.getLegalActions()
+        #legalMoves.remove(Directions.STOP)
+
+        #First line from books pseudocode
+        argmax = Directions.STOP
+        max_u = -999999
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+            utility = minValue(successorState, 1, treeDepth, utilityFunction)
+
+            if utility > max_u:
+               max_u = utility
+               argmax = action
+
+        return argmax
+
+    #endof minimaxDecision
+
+    #Variable declaration
+    treeDepth = self.treeDepth
+    utilityFunction = self.evaluationFunction
+
+    return minimaxDecision(gameState, treeDepth, utilityFunction)
+
+    #util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
@@ -138,7 +251,119 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       Returns the minimax action using self.treeDepth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    def ABmaxValue(state, alpha, beta, depth, utilityFunction):
+
+        #print depth
+        PACMAN_INDEX = 0
+        GHOST_INDEX = state.getNumAgents() - 1
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = -999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(PACMAN_INDEX)
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+
+            #Fourth line from books pseudocode
+            utility = max(utility, ABminValue(successorState, alpha, beta, GHOST_INDEX, depth, utilityFunction) )         
+
+            #check for prunning
+            if utility >= beta:
+                break
+            alpha = max(alpha, utility)
+
+        return utility
+
+    def ABminValue(state, alpha, beta, agent_index, depth, utilityFunction):
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = 999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(agent_index)
+
+        #Generalize alg to handle multi ghost
+
+        #Next one is pacman/MAX (Number of ghosts)
+        if agent_index == (state.getNumAgents() - 1):
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+                
+                #Fourth line from books pseudocode
+                utility = min(utility, ABmaxValue(successorState, alpha, beta, depth-1, utilityFunction) )
+                
+                #Stop and prune
+                if utility <= alpha:
+                    break
+                beta = min(beta, utility)
+
+        else:
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+
+                #Fourth line from books pseudocode
+                utility = min(utility, ABminValue(successorState, alpha, beta, agent_index+1, depth, utilityFunction) )
+                #Stop and prune
+                if utility <= alpha:
+                    break
+                beta = min(beta, utility)
+
+
+        return utility
+
+    def AlphaBetaSearch(state, treeDepth, utilityFunction):
+
+        alpha = -float("inf")
+        beta = float("inf")
+
+        #Agent index
+        PACMAN_INDEX = 0
+
+        # Collect legal moves and successor states
+        legalMoves = state.getLegalActions()
+        #legalMoves.remove(Directions.STOP)
+
+        #First line from books pseudocode
+        argmax = Directions.STOP
+        max_u = -999999
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+            utility = ABminValue(successorState, alpha, beta, 1, treeDepth, utilityFunction)
+
+            if utility > max_u:
+               max_u = utility
+               argmax = action
+
+            #Stop and prune
+            if utility >= beta:
+                argmax = action
+                break
+
+            alpha = max(alpha, utility)
+
+        return argmax
+
+    #endof AlphaBetaSearch
+
+    #Variable declaration
+    treeDepth = self.treeDepth
+    utilityFunction = self.evaluationFunction
+
+    return AlphaBetaSearch(gameState, treeDepth, utilityFunction)
+
+    #util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
@@ -153,17 +378,172 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       legal moves.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    def eMaxValue(state, depth, utilityFunction):
+
+        #print depth
+        PACMAN_INDEX = 0
+        GHOST_INDEX = 1
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        utility = -999999
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(PACMAN_INDEX)
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+
+            #Fourth line from books pseudocode
+            utility = max(utility, eMinValue(successorState, GHOST_INDEX, depth, utilityFunction) )
+            
+        return utility
+
+    def eMinValue(state, agent_index, depth, utilityFunction):
+
+        #TERMINAL_TEST (First line from books pseudocode)
+        if depth == 0 or state.isWin() or state.isLose():
+            return utilityFunction(state)
+
+        #Second line from books pseudocode
+        expectedUtility = 0
+
+        #Third line from books pseudocode
+        legalMoves = state.getLegalActions(agent_index)
+
+        #Generalize alg to handle multi ghost
+
+        #Next one is pacman/MAX (Number of ghosts)
+        if agent_index == (state.getNumAgents() - 1):
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+                
+                #Fourth line from books pseudocode
+                expectedUtility = expectedUtility + eMaxValue(successorState, depth-1, utilityFunction)
+        
+        else:
+
+            for action in legalMoves:
+                successorState = state.generateSuccessor(agent_index, action)
+
+                #Fourth line from books pseudocode
+                expectedUtility = expectedUtility + eMinValue(successorState, agent_index+1, depth, utilityFunction)
+
+
+        #Each action has equal chance of taking place
+        expectedUtility = expectedUtility / len (legalMoves)
+        return expectedUtility
+
+    def expectimax(state, treeDepth, utilityFunction):
+
+        #Agent index
+        PACMAN_INDEX = 0
+
+        # Collect legal moves and successor states
+        legalMoves = state.getLegalActions()
+        #legalMoves.remove(Directions.STOP)
+
+        #First line from books pseudocode
+        argmax = Directions.STOP
+        max_u = -999999
+        for action in legalMoves:
+            successorState = state.generateSuccessor(PACMAN_INDEX, action)
+            utility = eMinValue(successorState, 1, treeDepth, utilityFunction)
+
+            if utility > max_u:
+               max_u = utility
+               argmax = action
+
+        return argmax
+
+    #endof expectimax
+
+    #Variable declaration
+    treeDepth = self.treeDepth
+    utilityFunction = self.evaluationFunction
+
+    return expectimax(gameState, treeDepth, utilityFunction)
+
+    #util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
-  """
-    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-    evaluation function (question 5).
+    """
+        Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+        evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
-  """
-  "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+        DESCRIPTION: <write something here so we know what you did>
+
+        The evaluation is similar to the original evaluation with additional tweaks to hopefully
+        have a better end result
+
+        The first cosntraint is checking for win and loose states. If a win state is found
+        a large value is returned, while the opposite is done with a loose state
+
+        Otherwise the distance from ghosts is calculated as a basis for survival. To promote 
+        Pacman to eat while ghost are in opposite side of layout, when a ghost is far away
+        an extra bonus value of 100 is added to the evaluation. I tried different multipliers, 
+        and 10 seems to be adequate to keep survival as a high priority
+
+        The next important value to consider is distance from food. DIstances to all foods are 
+        substracted to promote being as close to food a spossible.
+
+        Finally we also give extra bonus of 100 to positions that conmtain a capsule
+        hoping to give said position an extra incentive to be chosen
+
+        I also tried to promote moving closer towards scared ghosts but implementing that
+        was quite problematic due to the object type of the ghosts and the provided 
+        scaredtimes. Plus no notisable benefit was seen when implemented 
+    """
+
+    newPosition = currentGameState.getPacmanPosition()
+    oldFood = currentGameState.getFood()
+    capsules = currentGameState.getCapsules()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+
+    eval = 0
+
+    "*** YOUR CODE HERE ***"
+
+    if currentGameState.isWin():
+        return 999999
+    elif currentGameState.isLose():
+        return -999999
+    else:
+
+        #Obtain ghost position tuples
+        ghostPositions = []
+        for ghostState in newGhostStates:
+            ghostPositions.append(ghostState.getPosition())
+
+        #The farther you are from a ghost, the better the position is
+        for ghostPos in ghostPositions:
+            if manhattanDistance(ghostPos, newPosition) > 8:
+                eval = eval + 100
+                continue
+            eval = eval + manhattanDistance(ghostPos, newPosition)
+
+        #Survival is very important
+        eval = eval * 10
+
+        #Foods as a list
+        food = oldFood.asList()
+        foodLeft = len(food)
+
+        #The farther you are from a food, the worst the position is
+        for foodPos in food:
+            eval = eval - manhattanDistance(foodPos, newPosition)
+
+
+        for capsulePos in capsules:
+            if capsulePos == newPosition:
+                eval = eval + 100
+
+        return eval
 
 # Abbreviation
 better = betterEvaluationFunction
@@ -183,4 +563,3 @@ class ContestAgent(MultiAgentSearchAgent):
     """
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
-
